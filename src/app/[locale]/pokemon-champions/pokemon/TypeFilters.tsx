@@ -22,7 +22,7 @@ export function TypeFilters({ selected }: { selected: PokemonType[] }) {
   }
 
   return (
-    <div className="mt-4 flex flex-wrap items-center gap-1.5">
+    <div className="flex flex-wrap items-center gap-1.5">
       <span className="mr-1 text-xs font-semibold uppercase tracking-wider text-zinc-500">
         {t("typeLabel")}
       </span>
