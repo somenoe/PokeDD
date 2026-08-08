@@ -42,5 +42,9 @@ yarn-error.log*
 next-env.d.ts
 data/pokeapi/*.csv
 data/pokeapi/*.json
+data/pokeapi/*.html
+data/csv-export/
 prisma/dev.db
 prisma/dev.db-journal
+/opencode.json
+/.opencode/plans
