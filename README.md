@@ -40,9 +40,9 @@ damage calculator that knows the meta.
 | Language | TypeScript strict |
 | Styling | Tailwind v4 |
 | i18n | [next-intl v4](https://next-intl.dev/) |
-| DB | [Neon Postgres](https://neon.tech) accessed via Prisma 6 |
-| Deploy | [Vercel](https://vercel.com) (pdx1 region, co-located with Neon) |
-| Data sources | [PokeAPI](https://pokeapi.co) CSV dump + [Smogon](https://www.smogon.com/stats/) chaos JSON |
+| DB | Local SQLite accessed via Prisma 6 |
+| Deploy | Local runtime; persistent SQLite hosting is not configured |
+| Data sources | [PokeAPI](https://pokeapi.co) CSV dump + official Pokémon Champions regulation roster + [Smogon](https://www.smogon.com/stats/) usage JSON |
 
 ## Getting started locally
 
@@ -50,15 +50,14 @@ damage calculator that knows the meta.
 # 1. Install
 npm install
 
-# 2. Set up DB credentials
+# 2. Configure the local SQLite database
 cp .env.example .env
-#   ... then fill in DATABASE_URL (pooled) + DIRECT_URL (unpooled) for Neon
 
-# 3. Pull the public data (PokeAPI CSVs + Smogon Champions chaos JSON)
+# 3. Pull the public data (PokeAPI, official Champions rules, and Smogon usage)
 bash scripts/refresh-data.sh
 
-# 4. Apply migrations + seed
-npx prisma migrate deploy
+# 4. Create the SQLite database + import data
+npx prisma db push
 npm run db:import
 
 # 5. Run the dev server

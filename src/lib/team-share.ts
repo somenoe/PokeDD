@@ -78,7 +78,7 @@ export async function decodeTeam(payload: string): Promise<TeamShare | null> {
 
 export const EMPTY_TEAM: TeamShare = {
   v: 1,
-  reg: "M-A",
+  reg: "M-B",
   fmt: "doubles",
   slots: [],
 };

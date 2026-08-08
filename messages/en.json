@@ -21,7 +21,7 @@
     "closeMenu": "Close menu"
   },
   "Hub": {
-    "regulationBadge": "Reg M-A",
+    "regulationBadge": "Reg M-B",
     "regulationLabel": "Current Regulation",
     "heroTitle": "pokeDD — Pokémon Champions Toolkit",
     "heroSubtitle": "No account. No login. Share a team with a URL.",
@@ -50,7 +50,7 @@
   },
   "List": {
     "title": "Pokémon",
-    "subtitle": "{count, plural, =1 {1 result} other {# results}} · Regulation M-A",
+    "subtitle": "{count, plural, =1 {1 result} other {# results}} · Regulation M-B",
     "search": "Search Pokémon…",
     "typeLabel": "Type:",
     "clear": "Clear",
@@ -285,7 +285,7 @@
     "formatSingles": "Singles",
     "formatDoubles": "Doubles",
     "regulation": "Regulation",
-    "regulationMA": "Reg M-A",
+    "regulationMB": "Reg M-B",
     "noItem": "(no item)",
     "moveSlot": "Move {n}",
     "moveNone": "(none)",

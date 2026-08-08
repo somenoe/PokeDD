@@ -25,6 +25,18 @@ import path from "node:path";
 import { ABILITY_OVERRIDES } from "./ability-overrides";
 import { ITEM_OVERRIDES } from "./item-overrides";
 import { MOVE_OVERRIDES } from "./move-overrides";
+import {
+  REGULATION_NAME,
+  REGULATION_SLUG,
+  REGULATION_SOURCE_URL,
+  REGULATION_VALID_FROM,
+  REGULATION_VALID_TO,
+  parseMegaNames,
+  parseOfficialPokemon,
+  resolveOfficialMegaSlugs,
+  resolveOfficialRosterSlugs,
+  validateRegulationNotice,
+} from "./champions-regulation";
 
 const DATA = path.join(__dirname, "../data/pokeapi");
 const prisma = new PrismaClient();
@@ -208,8 +220,8 @@ function forceI18n(
 // Pokémon Champions chaos dumps from Smogon. We pull both formats because
 // usage skews very differently between singles and doubles — players want
 // to see the right stats for whichever format they're building for.
-//   • VGC = official Pokémon Champions doubles (Regulation M-A)
-//   • BSS = official Pokémon Champions singles (Regulation M-A)
+//   • VGC = official Pokémon Champions doubles
+//   • BSS = official Pokémon Champions singles
 // In each list we prefer the all-ladder (0) dump for the broadest roster /
 // move / item coverage and fall back to higher cutoffs if the broader file
 // isn't on disk yet.
@@ -406,30 +418,6 @@ const COMPETITIVE_OVERLAY: Array<{ slug: string; rank: number; usagePct: number 
   { slug: "venusaur",   rank: 20, usagePct:  5.80 },
 ];
 
-// ─── Regulation M-B roster overlay ───────────────────────────────────────────
-// Regulation Set M-B launched 2026-06-16. Smogon publishes its first M-B chaos
-// dump around 2026-07-01, so until then there is NO usage data to drive the
-// Champions roster tag for the newly-legal Pokémon. Tag them explicitly here so
-// they surface in Champions list views / the team builder immediately (with 0%
-// usage until the July import overlays real numbers). All M-A-legal Pokémon
-// remain legal in M-B and are already tagged via Smogon usage, so this set only
-// needs the *additions*: 22 new base species + their 14 Mega Evolutions.
-// Source: pokemon.com Regulation Set M-B announcement.
-const CHAMPIONS_MB_POKEMON = new Set<string>([
-  // 22 newly-legal base species (pyroar's default form slug is "pyroar-male")
-  "vileplume", "qwilfish", "sceptile", "blaziken", "swampert", "mawile",
-  "metagross", "staraptor", "musharna", "scolipede", "scrafty", "eelektross",
-  "pyroar-male", "malamar", "barbaracle", "dragalge", "grimmsnarl", "falinks",
-  "overqwil", "houndstone", "annihilape", "gholdengo",
-  // 16 newly-legal Mega Evolutions (5 canonical + 11 Champions-original, all
-  // already curated into the PokeAPI CSVs with stats/types/learnsets/names).
-  // Raichu itself was already legal in M-A; only its two new Megas are added.
-  "sceptile-mega", "blaziken-mega", "swampert-mega", "mawile-mega",
-  "metagross-mega", "staraptor-mega", "scolipede-mega", "scrafty-mega",
-  "eelektross-mega", "pyroar-mega", "malamar-mega", "barbaracle-mega",
-  "dragalge-mega", "falinks-mega", "raichu-mega-x", "raichu-mega-y",
-]);
-
 // Mega stones for the M-B megas that already exist in PokeAPI as real items —
 // tagged Champions-legal via gamesFor().
 const CHAMPIONS_MB_MEGA_STONES = new Set<string>([
@@ -465,6 +453,16 @@ const DAMAGE_CLASS_ID_TO_SLUG: Record<number, string> = {
 async function main() {
   console.log("Importing PokeAPI dump…");
 
+  const regulationMBNotice = fs.readFileSync(path.join(DATA, "champions-regulation-reg-m-b.html"), "utf8");
+  const regulationMANotice = fs.readFileSync(path.join(DATA, "champions-regulation-reg-m-a.html"), "utf8");
+  const regulationMBRoster = fs.readFileSync(path.join(DATA, "champions-roster-reg-m-b.html"), "utf8");
+  validateRegulationNotice(regulationMBNotice);
+  const officialPokemon = parseOfficialPokemon(regulationMBRoster);
+  const officialMegaNames = [
+    ...parseMegaNames(regulationMANotice, 59),
+    ...parseMegaNames(regulationMBNotice, 16),
+  ];
+
   // POKEMON ───────────────────────────────────────────────────────────────────
   const pokemonRows = readCsv<{
     id: string; identifier: string; species_id: string; is_default: string;
@@ -485,6 +483,22 @@ async function main() {
     pokemon_move_method_id: string;
   }>("pokemon_moves.csv");
   const moveRowsRaw = readCsv<{ id: string; identifier: string }>("moves.csv");
+
+  const allPokemonSlugs = new Set(pokemonRows.map((p) => p.identifier));
+  const defaultSlugByDexNo = new Map(
+    pokemonRows
+      .filter((p) => p.is_default === "1")
+      .map((p) => [num(p.species_id), p.identifier] as const),
+  );
+  const regulationMBSlugs = resolveOfficialRosterSlugs(
+    officialPokemon,
+    defaultSlugByDexNo,
+    allPokemonSlugs,
+  );
+  for (const slug of resolveOfficialMegaSlugs(officialMegaNames, allPokemonSlugs)) {
+    regulationMBSlugs.add(slug);
+  }
+  console.log(`  Official ${REGULATION_NAME}: ${regulationMBSlugs.size} mapped Pokémon/forms`);
 
   const speciesNames = buildNameI18n(speciesNameRows, "pokemon_species_id", "name");
   const abilityIdToSlug = new Map(abilitiesMeta.map((a) => [num(a.id), a.identifier]));
@@ -584,8 +598,6 @@ async function main() {
     return itemSlugByCondensed.get(condense(name)) ?? null;
   };
   const mapSmogonMove = (name: string) => moveSlugByCondensed.get(condense(name)) ?? null;
-  const allPokemonSlugs = new Set(pokemonRows.map((p) => p.identifier));
-
   type UsageStats = {
     topAbilities: Array<{ slug: string; pct: number }>;
     topItems: Array<{ slug: string; pct: number }>;
@@ -734,8 +746,8 @@ async function main() {
   // For "any data was loaded" checks downstream
   const smogonFile = doublesStats.smogonFile ?? singlesStats.smogonFile;
 
-  // Union the roster across both formats — a mon is "Champions-legal" if it
-  // shows up in either singles or doubles usage data.
+  // Union usage observations across singles and doubles. Official regulation
+  // data above, not this usage set, determines roster legality.
   const rawCountBySlug = new Map<string, number>();
   for (const [k, v] of doublesStats.rawCountBySlug) rawCountBySlug.set(k, v);
   for (const [k, v] of singlesStats.rawCountBySlug) {
@@ -917,17 +929,8 @@ async function main() {
       spriteUrl: SPRITE(monId),
       usagePct: overlay?.usagePct ?? 0,
       rank: overlay?.rank ?? null,
-      regulations: JSON.stringify([]),
-      // Champions roster proxy: tag for "pokemon-champions" if this Pokémon
-      // showed up in the Smogon dump (i.e. people play it competitively) OR it
-      // is a Regulation M-B addition not yet covered by Smogon usage data.
-      // Mons absent from both stay in the DB as catalog reference but are
-      // filtered out of list views.
-      games: JSON.stringify(
-        rawCountBySlug.has(p.identifier) || CHAMPIONS_MB_POKEMON.has(p.identifier)
-          ? ["pokemon-champions"]
-          : [],
-      ),
+      regulations: JSON.stringify(regulationMBSlugs.has(p.identifier) ? [REGULATION_SLUG] : []),
+      games: JSON.stringify(regulationMBSlugs.has(p.identifier) ? ["pokemon-champions"] : []),
       learnableMoves: JSON.stringify(learnableMoves),
       usageStats: hasUsage ? JSON.stringify(usageStats) : "{}",
     };
@@ -936,6 +939,26 @@ async function main() {
   await prisma.pokemon.deleteMany();
   await prisma.pokemon.createMany({ data: pokemonRowsToInsert });
   console.log(`  → ${pokemonRowsToInsert.length} Pokémon`);
+
+  await prisma.regulation.upsert({
+    where: { slug: REGULATION_SLUG },
+    create: {
+      slug: REGULATION_SLUG,
+      name: REGULATION_NAME,
+      maxVp: 510,
+      allowTera: false,
+      validFrom: REGULATION_VALID_FROM,
+      validTo: REGULATION_VALID_TO,
+    },
+    update: {
+      name: REGULATION_NAME,
+      maxVp: 510,
+      allowTera: false,
+      validFrom: REGULATION_VALID_FROM,
+      validTo: REGULATION_VALID_TO,
+    },
+  });
+  console.log(`  → ${REGULATION_NAME} (${REGULATION_SOURCE_URL})`);
 
   // MOVES ─────────────────────────────────────────────────────────────────────
   const moveMeta = readCsv<{
@@ -1083,7 +1106,12 @@ async function main() {
   console.log(`  → ${abilityRowsToInsert.length} abilities`);
 
   // ITEMS ─────────────────────────────────────────────────────────────────────
-  const itemMeta = readCsv<{ id: string; identifier: string; category_id: string }>("items.csv");
+  const itemMeta = Array.from(
+    new Map(
+      readCsv<{ id: string; identifier: string; category_id: string }>("items.csv")
+        .map((item) => [item.identifier, item] as const),
+    ).values(),
+  );
   const itemNamesRows = readCsv<Record<string, string>>("item_names.csv");
   const itemFlavorRows = readCsv<Record<string, string>>("item_flavor_text.csv");
   const itemProseRows = readCsv<Record<string, string>>("item_prose.csv");
@@ -1149,8 +1177,10 @@ async function main() {
     };
   });
 
+  const itemSlugs = new Set(itemRowsToInsert.map((item) => item.slug));
   for (const slug of syntheticItemNameBySlug.keys()) {
     if (!championsItemSlugs.has(slug)) continue;
+    if (itemSlugs.has(slug)) continue;
     const override = ITEM_OVERRIDES[slug];
     const name = override?.name?.en ?? titleCaseFromSlug(slug);
     const desc = override?.short?.en ?? "Allows a compatible Pokémon to Mega Evolve in Pokémon Champions.";
@@ -1167,6 +1197,7 @@ async function main() {
       games: JSON.stringify(["pokemon-champions"]),
       usagePct: globalItemUsagePct.get(slug) ?? 0,
     });
+    itemSlugs.add(slug);
   }
 
   // Inject the Regulation M-B Champions-original Mega stones (no PokeAPI row,

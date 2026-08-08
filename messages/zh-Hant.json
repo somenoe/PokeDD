@@ -21,7 +21,7 @@
     "closeMenu": "關閉選單"
   },
   "Hub": {
-    "regulationBadge": "規則 M-A",
+    "regulationBadge": "規則 M-B",
     "regulationLabel": "現行規則",
     "heroTitle": "口袋滴滴 — 寶可夢冠軍工具",
     "heroSubtitle": "無需帳號。無需登入。一條 URL 即可分享。",
@@ -50,7 +50,7 @@
   },
   "List": {
     "title": "寶可夢",
-    "subtitle": "{count, plural, other {# 個結果}} · 規則 M-A",
+    "subtitle": "{count, plural, other {# 個結果}} · 規則 M-B",
     "search": "搜尋寶可夢…",
     "typeLabel": "屬性:",
     "clear": "清除",
@@ -285,7 +285,7 @@
     "formatSingles": "單打",
     "formatDoubles": "雙打",
     "regulation": "規則",
-    "regulationMA": "規則 M-A",
+    "regulationMB": "規則 M-B",
     "noItem": "(無道具)",
     "moveSlot": "招式 {n}",
     "moveNone": "(無)",

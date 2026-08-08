@@ -21,7 +21,7 @@
     "closeMenu": "关闭菜单"
   },
   "Hub": {
-    "regulationBadge": "规则 M-A",
+    "regulationBadge": "规则 M-B",
     "regulationLabel": "当前规则",
     "heroTitle": "口袋滴滴 — 宝可梦冠军工具",
     "heroSubtitle": "无需账号。无需登录。一条 URL 即可分享。",
@@ -50,7 +50,7 @@
   },
   "List": {
     "title": "宝可梦",
-    "subtitle": "{count, plural, other {# 个结果}} · 规则 M-A",
+    "subtitle": "{count, plural, other {# 个结果}} · 规则 M-B",
     "search": "搜索宝可梦…",
     "typeLabel": "属性:",
     "clear": "清除",
@@ -285,7 +285,7 @@
     "formatSingles": "单打",
     "formatDoubles": "双打",
     "regulation": "规则",
-    "regulationMA": "规则 M-A",
+    "regulationMB": "规则 M-B",
     "noItem": "(无道具)",
     "moveSlot": "招式 {n}",
     "moveNone": "(无)",

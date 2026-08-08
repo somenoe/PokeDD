@@ -343,7 +343,7 @@ export function parseShowdownText(
     return {
       team: {
         v: 1,
-        reg: opts?.regulation ?? "M-A",
+        reg: opts?.regulation ?? "M-B",
         fmt: opts?.format ?? "doubles",
         slots: [],
       },
@@ -508,7 +508,7 @@ export function parseShowdownText(
   return {
     team: {
       v: 1,
-      reg: opts?.regulation ?? "M-A",
+      reg: opts?.regulation ?? "M-B",
       fmt: opts?.format ?? "doubles",
       slots,
     },

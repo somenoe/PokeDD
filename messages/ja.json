@@ -21,7 +21,7 @@
     "closeMenu": "メニューを閉じる"
   },
   "Hub": {
-    "regulationBadge": "レギュ M-A",
+    "regulationBadge": "レギュ M-B",
     "regulationLabel": "現行レギュレーション",
     "heroTitle": "pokeDD — ポケモンチャンピオンズ ツール",
     "heroSubtitle": "アカウント不要。ログイン不要。URLでチームを共有。",
@@ -50,7 +50,7 @@
   },
   "List": {
     "title": "ポケモン",
-    "subtitle": "{count, plural, other {# 件}} · レギュレーションM-A",
+    "subtitle": "{count, plural, other {# 件}} · レギュレーションM-B",
     "search": "ポケモンを検索…",
     "typeLabel": "タイプ:",
     "clear": "クリア",
@@ -285,7 +285,7 @@
     "formatSingles": "シングル",
     "formatDoubles": "ダブル",
     "regulation": "レギュレーション",
-    "regulationMA": "レギュ M-A",
+    "regulationMB": "レギュ M-B",
     "noItem": "(もちものなし)",
     "moveSlot": "わざ {n}",
     "moveNone": "(なし)",

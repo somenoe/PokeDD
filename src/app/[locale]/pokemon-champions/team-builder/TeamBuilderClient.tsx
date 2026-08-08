@@ -325,7 +325,7 @@ export function TeamBuilderClient({
       {/* Regulation label — format toggle now lives in the title bar */}
       <div className="mt-4 flex flex-wrap items-center gap-3 text-xs">
         <div className="rounded-md bg-zinc-100 px-2.5 py-1 font-semibold uppercase tracking-wider text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
-          {t("regulationMA")}
+          {t("regulationMB")}
         </div>
       </div>
 
