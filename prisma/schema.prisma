@@ -1,15 +1,14 @@
-// pokeDD schema — Neon Postgres.
-// JSON-shaped columns stay as TEXT (not jsonb) because we use substring
-// `contains` searches against them for multi-lang name lookup.
+// pokeDD schema — local SQLite / Prisma.
+// JSON-shaped columns stay as TEXT because we use substring `contains` searches
+// against them for multi-language name lookup.
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider  = "postgresql"
+  provider = "sqlite"
   url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
 }
 
 // Short links for shareable team URLs (pokedd.com/l/<id>). The `payload` is the
@@ -28,7 +27,7 @@ model Pokemon {
   slug        String   @unique
   dexNo       Int
   name        String
-  // JSON map of locale → localized display name. SQLite stores as TEXT.
+  // JSON map of locale → localized display name.
   nameI18n    String   @default("{}")
   type1       String
   type2       String?

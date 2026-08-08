@@ -50,9 +50,9 @@ export default async function MovesListPage({
   const where: Record<string, unknown> = {};
   if (q) {
     where.OR = [
-      { name: { contains: q, mode: "insensitive" } },
-      { nameI18n: { contains: q, mode: "insensitive" } },
-      { slug: { contains: q, mode: "insensitive" } },
+      { name: { contains: q } },
+      { nameI18n: { contains: q } },
+      { slug: { contains: q } },
     ];
   }
   if (typeFilter.length > 0) where.type = { in: typeFilter };
