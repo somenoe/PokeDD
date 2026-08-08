@@ -71,7 +71,9 @@
       "spa": "とくこう",
       "spd": "とくぼう",
       "spe": "すばやさ",
-      "bst": "合計"
+      "bst": "合計",
+      "total_defends": "防御+特防",
+      "total_defends_and_hp": "HP+防御+特防"
     }
   },
   "Detail": {

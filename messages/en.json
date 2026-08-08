@@ -71,7 +71,9 @@
       "spa": "SpA",
       "spd": "SpD",
       "spe": "Spe",
-      "bst": "BST"
+      "bst": "BST",
+      "total_defends": "Def+SpD",
+      "total_defends_and_hp": "HP+Def+SpD"
     }
   },
   "Detail": {

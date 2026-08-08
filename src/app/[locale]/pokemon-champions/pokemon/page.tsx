@@ -7,7 +7,8 @@ import { PokemonListClient } from "./PokemonListClient";
 export const dynamic = "force-dynamic";
 
 type Sort =
-  | "dex" | "name" | "usage" | "hp" | "atk" | "def" | "spa" | "spd" | "spe" | "bst";
+  | "dex" | "name" | "usage" | "hp" | "atk" | "def" | "spa" | "spd" | "spe"
+  | "bst" | "total_defends" | "total_defends_and_hp";
 
 type ParsedSearch = {
   type?: string;
@@ -33,7 +34,11 @@ const SORT_TO_FIELD: Record<Sort, string> = {
   usage: "usagePct",
   hp: "hp", atk: "atk", def: "def", spa: "spa", spd: "spd", spe: "spe",
   bst: "bst",
+  total_defends: "total_defends",
+  total_defends_and_hp: "total_defends_and_hp",
 };
+
+const DERIVED_SORTS = new Set<Sort>(["bst", "total_defends", "total_defends_and_hp"]);
 
 export default async function PokemonListPage({
   params,
@@ -52,7 +57,12 @@ export default async function PokemonListPage({
     .filter((s): s is PokemonType => (POKEMON_TYPES as readonly string[]).includes(s));
   const sort = sp.sort;
   const dir = sp.dir ?? (sort === "name" || sort === "dex" ? "asc" : "desc");
-  const orderBy = sort === "bst" ? undefined : { [SORT_TO_FIELD[sort]]: dir as "asc" | "desc" };
+  const orderBy = DERIVED_SORTS.has(sort)
+    ? undefined
+    : [
+        { [SORT_TO_FIELD[sort]]: dir as "asc" | "desc" },
+        { name: "asc" as const },
+      ];
 
   const where: Record<string, unknown> = {
     // Mega filtering is intentionally client-side so the toggle never waits for a server navigation.
@@ -80,10 +90,17 @@ export default async function PokemonListPage({
       spa: true, spd: true, spe: true, spriteUrl: true, usagePct: true,
     },
   });
-  if (sort === "bst") {
+  if (DERIVED_SORTS.has(sort)) {
     pokemon = pokemon
-      .map((p) => ({ ...p, _bst: p.hp + p.atk + p.def + p.spa + p.spd + p.spe }))
-      .sort((a, b) => (dir === "asc" ? a._bst - b._bst : b._bst - a._bst));
+      .sort((a, b) => {
+        const value = (p: typeof a) => sort === "bst"
+          ? p.hp + p.atk + p.def + p.spa + p.spd + p.spe
+          : sort === "total_defends"
+            ? p.def + p.spd
+            : p.hp + p.def + p.spd;
+        const statCompare = dir === "asc" ? value(a) - value(b) : value(b) - value(a);
+        return statCompare || a.name.localeCompare(b.name);
+      });
   }
 
   return (

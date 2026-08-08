@@ -71,7 +71,9 @@
       "spa": "特攻",
       "spd": "特防",
       "spe": "速度",
-      "bst": "總和"
+      "bst": "總和",
+      "total_defends": "防禦+特防",
+      "total_defends_and_hp": "HP+防禦+特防"
     }
   },
   "Detail": {

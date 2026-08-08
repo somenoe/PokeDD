@@ -30,7 +30,9 @@ export type PokemonListRow = {
   usagePct: number;
 };
 
-type Sort = "dex" | "name" | "usage" | "hp" | "atk" | "def" | "spa" | "spd" | "spe" | "bst";
+type Sort =
+  | "dex" | "name" | "usage" | "hp" | "atk" | "def" | "spa" | "spd" | "spe"
+  | "bst" | "total_defends" | "total_defends_and_hp";
 
 export function PokemonListClient({
   pokemon,
@@ -89,12 +91,14 @@ export function PokemonListClient({
               <SortHeader sort={sort} dir={dir} field="spd" label={cols("spd")} />
               <SortHeader sort={sort} dir={dir} field="spe" label={cols("spe")} />
               <SortHeader sort={sort} dir={dir} field="bst" label={cols("bst")} />
+              <SortHeader sort={sort} dir={dir} field="total_defends" label={cols("total_defends")} />
+              <SortHeader sort={sort} dir={dir} field="total_defends_and_hp" label={cols("total_defends_and_hp")} />
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
             {visiblePokemon.length === 0 ? (
               <tr>
-                <td colSpan={12} className="px-3 py-8 text-center text-zinc-500">
+                <td colSpan={14} className="px-3 py-8 text-center text-zinc-500">
                   {t("empty")} {" "}
                   <Link href="/pokemon-champions/pokemon" className="font-medium underline">
                     {t("clearFilters")}
@@ -122,6 +126,8 @@ export function PokemonListClient({
                   <td className="px-3 py-2 text-right font-mono tabular-nums">{p.spd}</td>
                   <td className="px-3 py-2 text-right font-mono tabular-nums">{p.spe}</td>
                   <td className="px-3 py-2 text-right font-mono font-semibold tabular-nums">{bst}</td>
+                  <td className="px-3 py-2 text-right font-mono font-semibold tabular-nums">{p.def + p.spd}</td>
+                  <td className="px-3 py-2 text-right font-mono font-semibold tabular-nums">{p.hp + p.def + p.spd}</td>
                 </tr>
               );
             })}

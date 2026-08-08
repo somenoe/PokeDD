@@ -5,9 +5,13 @@ import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 
 type Sort =
-  | "dex" | "name" | "usage" | "hp" | "atk" | "def" | "spa" | "spd" | "spe" | "bst";
+  | "dex" | "name" | "usage" | "hp" | "atk" | "def" | "spa" | "spd" | "spe"
+  | "bst" | "total_defends" | "total_defends_and_hp";
 
-const NUMERIC_FIELDS: Sort[] = ["usage", "hp", "atk", "def", "spa", "spd", "spe", "bst"];
+const NUMERIC_FIELDS: Sort[] = [
+  "usage", "hp", "atk", "def", "spa", "spd", "spe", "bst",
+  "total_defends", "total_defends_and_hp",
+];
 
 export function SortHeader({
   sort,
