@@ -7,7 +7,7 @@ export function MegaFilter({ hidden, onToggle }: { hidden: boolean; onToggle: ()
   const t = useTranslations("List");
 
   return (
-    <div className="flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="inline-flex w-fit max-w-full items-center gap-2 rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 dark:border-zinc-800 dark:bg-zinc-900">
       <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
         {t("megaLabel")}
       </span>

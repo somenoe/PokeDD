@@ -2,12 +2,14 @@
 
 import Image from "next/image";
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { TypeChip } from "@/components/TypeChip";
 import type { Locale } from "@/i18n/routing";
 import { localizedPokemonName } from "@/lib/i18n-pokemon";
 import { type PokemonType } from "@/lib/types";
 import { MegaFilter } from "./MegaFilter";
+import { DefenseTotalsFilter } from "./DefenseTotalsFilter";
 import { SortHeader } from "./SortHeader";
 import { TypeFilters } from "./TypeFilters";
 import { useState } from "react";
@@ -51,7 +53,9 @@ export function PokemonListClient({
 }) {
   const t = useTranslations("List");
   const cols = useTranslations("List.columns");
+  const router = useRouter();
   const [megaHidden, setMegaHidden] = useState(initialMegaHidden);
+  const [defenseTotalsVisible, setDefenseTotalsVisible] = useState(true);
   const visiblePokemon = megaHidden ? pokemon.filter((p) => !p.slug.includes("-mega")) : pokemon;
 
   function toggleMega() {
@@ -63,17 +67,33 @@ export function PokemonListClient({
     window.history.replaceState(null, "", url);
   }
 
+  function toggleDefenseTotals() {
+    setDefenseTotalsVisible((visible) => !visible);
+    if (sort === "total_defends" || sort === "total_defends_and_hp") {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("sort");
+      url.searchParams.delete("dir");
+      router.replace(`${url.pathname}${url.search}`, { scroll: false });
+    }
+  }
+
   return (
     <>
       <p className="mt-1 text-sm text-zinc-500">
         {t("subtitle", { count: visiblePokemon.length })}
       </p>
 
-      <div className="mt-4">
+      <div className="mt-4 flex flex-wrap items-center gap-2">
         <MegaFilter hidden={megaHidden} onToggle={toggleMega} />
+        <DefenseTotalsFilter
+          visible={defenseTotalsVisible}
+          onToggle={toggleDefenseTotals}
+        />
       </div>
 
-      <TypeFilters selected={selectedTypes} />
+      <div className="mt-2">
+        <TypeFilters selected={selectedTypes} />
+      </div>
 
       <div className="mt-4 overflow-x-auto rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
         <table className="min-w-full text-sm">
@@ -91,14 +111,14 @@ export function PokemonListClient({
               <SortHeader sort={sort} dir={dir} field="spd" label={cols("spd")} />
               <SortHeader sort={sort} dir={dir} field="spe" label={cols("spe")} />
               <SortHeader sort={sort} dir={dir} field="bst" label={cols("bst")} />
-              <SortHeader sort={sort} dir={dir} field="total_defends" label={cols("total_defends")} />
-              <SortHeader sort={sort} dir={dir} field="total_defends_and_hp" label={cols("total_defends_and_hp")} />
+              {defenseTotalsVisible ? <SortHeader sort={sort} dir={dir} field="total_defends" label={cols("total_defends")} /> : null}
+              {defenseTotalsVisible ? <SortHeader sort={sort} dir={dir} field="total_defends_and_hp" label={cols("total_defends_and_hp")} /> : null}
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
             {visiblePokemon.length === 0 ? (
               <tr>
-                <td colSpan={14} className="px-3 py-8 text-center text-zinc-500">
+                <td colSpan={defenseTotalsVisible ? 14 : 12} className="px-3 py-8 text-center text-zinc-500">
                   {t("empty")} {" "}
                   <Link href="/pokemon-champions/pokemon" className="font-medium underline">
                     {t("clearFilters")}
@@ -126,8 +146,8 @@ export function PokemonListClient({
                   <td className="px-3 py-2 text-right font-mono tabular-nums">{p.spd}</td>
                   <td className="px-3 py-2 text-right font-mono tabular-nums">{p.spe}</td>
                   <td className="px-3 py-2 text-right font-mono font-semibold tabular-nums">{bst}</td>
-                  <td className="px-3 py-2 text-right font-mono font-semibold tabular-nums">{p.def + p.spd}</td>
-                  <td className="px-3 py-2 text-right font-mono font-semibold tabular-nums">{p.hp + p.def + p.spd}</td>
+                  {defenseTotalsVisible ? <td className="px-3 py-2 text-right font-mono font-semibold tabular-nums">{p.def + p.spd}</td> : null}
+                  {defenseTotalsVisible ? <td className="px-3 py-2 text-right font-mono font-semibold tabular-nums">{p.hp + p.def + p.spd}</td> : null}
                 </tr>
               );
             })}
