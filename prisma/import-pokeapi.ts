@@ -279,8 +279,8 @@ const SMOGON_NAME_FIXUPS: Record<string, string> = {
   "maushold": "maushold-family-of-four",
   "meowstic": "meowstic-male",
   "meowstic-f": "meowstic-female",
-  "meowstic-f-mega": "meowstic-mega",
-  "meowstic-m-mega": "meowstic-mega",
+  "meowstic-f-mega": "meowstic-female-mega",
+  "meowstic-m-mega": "meowstic-male-mega",
   "mimikyu": "mimikyu-disguised",
   "morpeko": "morpeko-full-belly",
   "oinkologne-f": "oinkologne-female",
@@ -1106,12 +1106,16 @@ async function main() {
   console.log(`  → ${abilityRowsToInsert.length} abilities`);
 
   // ITEMS ─────────────────────────────────────────────────────────────────────
-  const itemMeta = Array.from(
-    new Map(
-      readCsv<{ id: string; identifier: string; category_id: string }>("items.csv")
-        .map((item) => [item.identifier, item] as const),
-    ).values(),
-  );
+  const itemMetaBySlug = new Map<
+    string,
+    { id: string; identifier: string; category_id: string }
+  >();
+  for (const item of readCsv<{ id: string; identifier: string; category_id: string }>(
+    "items.csv",
+  )) {
+    if (!itemMetaBySlug.has(item.identifier)) itemMetaBySlug.set(item.identifier, item);
+  }
+  const itemMeta = Array.from(itemMetaBySlug.values());
   const itemNamesRows = readCsv<Record<string, string>>("item_names.csv");
   const itemFlavorRows = readCsv<Record<string, string>>("item_flavor_text.csv");
   const itemProseRows = readCsv<Record<string, string>>("item_prose.csv");
